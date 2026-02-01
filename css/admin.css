@@ -53,24 +53,14 @@ body {
     background-color: #ffcccc;
 }
 
-.day-type-1-pending {
-    background-color: #93EBF777;
+.day-status-0 {
+    background-color:rgb(225, 140, 150)
 }
-
-.day-type-2-pending {
-    background-color: #5BFB9C77;
+.day-status-1 {
+    background-color:rgb(225, 205, 115)
 }
-
-.day-type-3-pending {
-    background-color: #FF99FF77;
-}
-
-.day-type-4-pending {
-    background-color: #bb88ff77;
-}
-
-.day-type-5-pending {
-    background-color: #ffcccc77;
+.day-status-2 {
+    background-color:rgb(140, 225, 140)
 }
 
 

@@ -251,7 +251,7 @@ function renderCalendar(date) {
                     let status = vacationDay.status
                     let statusEmoji = ['❗', '⏳', ''][status + 1]
                     let statusClass = ['-pending', '-pending', ''][status + 1]
-                    cellHtml += `<div class="hover-border day-type-${type}${statusClass} p-0 px-1 m-0 fw-normal rounded" style="font-size:85%">${statusEmoji} ${name}</div>`
+                    cellHtml += `<div class="hover-border day-status-${status + 1} p-0 px-1 m-0 fw-normal rounded" style="font-size:85%">${statusEmoji} ${name}</div>`
                 })
             }
             else {
@@ -932,9 +932,10 @@ $(document).ready(async function () {
                 let name = `${user.firstName} ${user.lastName}`
                 let dayType = vacationDay.dayType
                 let dayTypeName = vacationTypes[dayType - 1]
+                let status = vacationDay.status
                 $(".day-overview-modal-vacations").append(`
-                    <div class="my-2">
-                    <span class="fw-bold">${name}</span> - <span class="day-type-${dayType} rounded px-1">${dayTypeName}</span>
+                    <div class="my-3">
+                    <span class="fw-bold day-status-${status + 1} p-1 px-2 rounded">${name}</span>
                     </div>
                     `)
             })
@@ -969,6 +970,16 @@ $(document).ready(async function () {
         else {
             $(".day-overview-modal-holidays-events").html("אין מה להציג...")
         }
+
+        let vacationDayUsers = vacationDays.map(vacationDay => getVacation(vacationDay.vacationId).vacation.userId)
+        $(".day-overview-modal-team-members").html(`${
+            users.map(user => {
+                let vacationDay = getVacationDayByUserId(today, user.userId)
+                let opacity = vacationDay == null ? "100" : ["75","75","50"][vacationDay.status + 1]
+                let emoji = vacationDay == null ? "✅" : ["❗⏳","⏳","❌"][vacationDay.status + 1]
+                //❗', '⏳', '✅
+                return `${emoji} <span class="opacity-${opacity}">${user.firstName} ${user.lastName}</span>`
+            }).join("<br>")}`)
 
         $(".day-overview-modal-title").html(`${dateFns.format(today, "dd.MM.yyyy")} - יום ${weekDayNames[today.getDay()]}`)
         $(".day-overview-modal").modal("show")
