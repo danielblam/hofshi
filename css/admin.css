@@ -143,3 +143,7 @@ td:hover {
 .add-event-button {
     margin-bottom: 70px;
 }
+
+.extra-bottom-padding {
+    padding-bottom:100px;
+}
