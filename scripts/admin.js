@@ -976,9 +976,9 @@ $(document).ready(async function () {
             users.map(user => {
                 let vacationDay = getVacationDayByUserId(today, user.userId)
                 let opacity = vacationDay == null ? "100" : ["75","75","50"][vacationDay.status + 1]
-                let emoji = vacationDay == null ? "✅" : ["❗⏳","⏳","❌"][vacationDay.status + 1]
-                //❗', '⏳', '✅
-                return `${emoji} <span class="opacity-${opacity}">${user.firstName} ${user.lastName}</span>`
+                let statusText = vacationDay == null ? "נמצא" : ["חופש לא אושר","מחכה לאישור חופש","בחופש"][vacationDay.status + 1]
+                // TODO : use text instead of emojis. Laaaame but okay
+                return `<span class="fw-bold opacity-${opacity}">${user.firstName} ${user.lastName}</span> - ${statusText}`
             }).join("<br>")}`)
 
         $(".day-overview-modal-title").html(`${dateFns.format(today, "dd.MM.yyyy")} - יום ${weekDayNames[today.getDay()]}`)
