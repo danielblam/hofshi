@@ -350,14 +350,14 @@ function buildVacationList() {
             let type = vacationDay.dayType
             let dayStatusEmoji = ['❌', '', '✔️'][vacationDay.status + 1]
             return `<div class="row">
-                    <div class="col-9">
-                    <div class="vacation-list-day day-type-${type} rounded pe-1 my-1">
-                    ${dateFns.format(date, "dd/MM/yy")} - יום ${weekDays[date.getDay()]} - ${vacationTypes[type - 1]}
-                    
-                    </div>
-                    </div>
-                    <div class="col-3 fw-bold text-end p-0 my-1">${dayStatusEmoji}</div>
-                    </div>`
+                                <div class="col-9">
+                                <div class="vacation-list-day day-status-${vacationDay.status + 1} rounded pe-1 my-1">
+                                ${dateFns.format(date, "dd/MM/yy")} - יום ${weekDays[date.getDay()]} - ${vacationTypes[type - 1]}
+                                
+                                </div>
+                                </div>
+                                <div class="col-3 fw-bold text-end p-0 my-1">${dayStatusEmoji}</div>
+                                </div>`
         }).join("")}
                 <button class="btn bg-secondary bg-opacity-50 my-2 delete-vacation-request">🗑</button>
                 <button class="btn bg-secondary bg-opacity-50 my-2 resolve-vacation-request">📝</button>
@@ -972,14 +972,13 @@ $(document).ready(async function () {
         }
 
         let vacationDayUsers = vacationDays.map(vacationDay => getVacation(vacationDay.vacationId).vacation.userId)
-        $(".day-overview-modal-team-members").html(`${
-            users.map(user => {
-                let vacationDay = getVacationDayByUserId(today, user.userId)
-                let opacity = vacationDay == null ? "100" : ["75","75","50"][vacationDay.status + 1]
-                let statusText = vacationDay == null ? "נמצא" : ["חופש לא אושר","מחכה לאישור חופש","בחופש"][vacationDay.status + 1]
-                // TODO : use text instead of emojis. Laaaame but okay
-                return `<span class="fw-bold opacity-${opacity}">${user.firstName} ${user.lastName}</span> - ${statusText}`
-            }).join("<br>")}`)
+        $(".day-overview-modal-team-members").html(`${users.map(user => {
+            let vacationDay = getVacationDayByUserId(today, user.userId)
+            let opacity = vacationDay == null ? "100" : ["75", "75", "50"][vacationDay.status + 1]
+            let statusText = vacationDay == null ? "נמצא" : ["חופש לא אושר", "מחכה לאישור חופש", "בחופש"][vacationDay.status + 1]
+            // TODO : use text instead of emojis. Laaaame but okay
+            return `<span class="fw-bold opacity-${opacity}">${user.firstName} ${user.lastName}</span> - ${statusText}`
+        }).join("<br>")}`)
 
         $(".day-overview-modal-title").html(`${dateFns.format(today, "dd.MM.yyyy")} - יום ${weekDayNames[today.getDay()]}`)
         $(".day-overview-modal").modal("show")
