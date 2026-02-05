@@ -54,13 +54,13 @@ body {
 }
 
 .day-status-0 {
-    background-color:rgb(225, 140, 150)
+    background-color:#ee8899
 }
 .day-status-1 {
-    background-color:rgb(225, 205, 115)
+    background-color:#eecc77
 }
 .day-status-2 {
-    background-color:rgb(140, 225, 140)
+    background-color:#88ee88
 }
 
 
@@ -83,11 +83,15 @@ body {
     direction: rtl;
 }
 
-.form-check-input:focus {
+.ltr {
+    direction: ltr;
+}
+
+.vacation-check:focus {
     box-shadow: 0 0 0 0px rgba(0, 0, 0, 1);
 }
 
-.form-check-input:checked {
+.vacation-check:checked {
     background-color: var(--bs-success);
     border-color: #000000;
 }

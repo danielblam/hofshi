@@ -309,20 +309,23 @@
                 <!-- Modal body -->
                 <div class="modal-body rtl">
                     <div class="fw-bold">
-                        סה"כ ימי חופשה בצוות: <span class="stats-total-vacation-days"></span><br>
+                        הצגת ימי חופש לפי משתמש:
                     </div>
-                    <div class="w-25 input-group my-2">
-                        <span class="input-group-text">לחלק לפי...</span>
-                        <select class="form-select statistics-filter-select">
-                            <option value="0">סוג יום חופש</option>
-                            <option value="2">משתמש</option>
+                    <input class="form-check-input mx-2" type="radio" name="stats-filter" value="1">
+                    <label>השנה</label>
+                    <input class="form-check-input mx-2" type="radio" name="stats-filter" value="0">
+                    <label>החודש</label>
+                    <!-- <div class="w-25 input-group my-2 ltr">
+                        <select class="form-select statistics-filter-select rtl">
+                            <option value="0">חודש</option>
+                            <option value="1">שנה</option>
                         </select>
+                        <span class="input-group-text">...לחלק לפי</span>
                     </div>
                     <div class="row">
                         <div class="col-2">
                             <select class="form-select stats-time-range">
                                 <option value="all">הכל</option>
-                                <option value="month">לפי חודש</option>
                             </select>
                         </div>
                     </div>
@@ -331,7 +334,7 @@
                         <button class="btn btn-white p-1 stats-next-month">▶️</button>
                         <label class="stats-month-label p-1 text-center border rounded">דצמבר 2025</label>
                         <button class="btn btn-white p-1 stats-previous-month">◀️</button>
-                    </div>
+                    </div> -->
                     <div class="chart-container">
                         <canvas id="statistics-chart" class="w-100"></canvas>
                     </div>

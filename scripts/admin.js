@@ -313,7 +313,7 @@ function buildVacationDayEditor(dates, types) {
     dates.forEach((date, index) => {
         $(".vacation-days").append(
             `<div class="vacation-day my-1 p-1 d-flex rounded fw-bold" data-day-type="${types[index]}">
-                ${addOrEdit == "edit" ? `<input class="vacation-day-approval form-check-input p-3 ms-2 m-auto" type="checkbox" checked>` : ``}
+                ${addOrEdit == "edit" ? `<input class="vacation-day-approval form-check-input vacation-check p-3 ms-2 m-auto" type="checkbox" checked>` : ``}
                 <div class="col-3 p-1 ps-4">
                     ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} - יום ${weekDays[date.getDay()]}
                 </div>
@@ -413,68 +413,73 @@ function vacationConflict() {
 }
 function drawChart(type) {
     let onlyMonthly = $(".stats-time-range").val() == "month"
-    let labels = ["Placeholder"]
-    let data = [1]
-    let colors = "#0d6efd"
+    let labels = users.map(user => `${user.firstName} ${user.lastName}`)
+    let data = [[], [], []]
+    let colors = ["#ee8899", "#eecc77", "#88ee88"]
     let chartType = "bar"
-    switch (Number(type)) {
-        case 0:
-            labels = ["יום חופש", "חצי יום חופש", "יום בחירה", "יום הצהרה", "היעדרות צפויה"]
-            data = [0, 0, 0, 0, 0]
-            vacations.forEach(vacation => {
-                vacation.vacationDays.forEach(vacationDay => {
-                    if (onlyMonthly && vacationDay.date.getMonth() != statsMonth.getMonth()) return
-                    data[vacationDay.dayType - 1]++
-                })
+    users.forEach(user => {
+        let userVacations = vacations.filter(vacation => vacation.vacation.userId == user.userId)
+        let userData = [0, 0, 0]
+        userVacations.forEach(vacation => {
+            vacation.vacationDays.forEach(vacationDay => {
+                console.log(vacationDay, type)
+                switch (Number(type)) {
+                    case 0:
+                        if (vacationDay.date.getMonth() == (new Date()).getMonth()) {
+                            userData[vacationDay.status + 1]++
+                        }
+                        break
+                    case 1:
+                        if (vacationDay.date.getFullYear() == (new Date()).getFullYear()) {
+                            userData[vacationDay.status + 1]++
+                        }
+                        break
+                }
             })
-            colors = ["#93EBF7", "#5BFB9C", "#FF99FF", "#BB88FF", "#FFCCCC"]
-            chartType = "pie"
-            break
-        case 2:
-            labels = []
-            data = []
-            users.forEach(user => {
-                labels.push(`${user.firstName} ${user.lastName}`)
-                let days = 0
-                vacations.filter(vacation => vacation.vacation.userId == user.userId).forEach(vacation => {
-                    vacation.vacationDays.forEach(vacationDay => {
-                        if (onlyMonthly && vacationDay.date.getMonth() != statsMonth.getMonth()) return
-                        days++
-                    })
-                })
-                data.push(days)
-            })
-            break
-    }
+        })
+        data[0].push(userData[0])
+        data[1].push(userData[1])
+        data[2].push(userData[2])
+    })
 
     if (statsChart != undefined) statsChart.destroy()
 
     statsChart = new Chart($("#statistics-chart"), {
-        type: chartType,
+        type: "bar",
         data: {
             labels: labels,
-            datasets: [{
-                backgroundColor: colors,
-                data: data,
-                label: "Days"
-            }]
+            datasets: [
+                {
+                    backgroundColor: colors[2],
+                    data: data[2],
+                    label: "ימי חופש מאושרים"
+                },
+                {
+                    backgroundColor: colors[1],
+                    data: data[1],
+                    label: "ימי חופש בהמתנה לאישור"
+                },
+                {
+                    backgroundColor: colors[0],
+                    data: data[0],
+                    label: "ימי חופש לא מאושרים"
+                }
+            ]
         },
         options: {
-            indexAxis: 'x',
             plugins: {
-                legend: { display: type == 0 },
+                legend: { display: true },
                 title: { display: false }
             },
-            radius: "100%",
             maintainAspectRatio: false,
-            scales: type > 0 ? {
+            scales: {
                 x: {
-                    reverse: true
+                    stacked: true
                 },
                 y: {
-                    position: 'right'
+                    stacked: true
                 }
-            } : null
+            }
         }
     })
 
@@ -771,19 +776,19 @@ $(document).ready(async function () {
     })
 
     $(".statistics-button").click(function () {
-        let days = 0
-        vacations.forEach(vacation => {
-            days += vacation.vacationDays.length
-        })
-        $(".stats-total-vacation-days").html(days)
+
         updateStatsNavigationLabel(statsMonth)
         $(".statistics-modal").modal("show")
     })
 
-    $(".statistics-filter-select").change(function () {
+    // $(".statistics-filter-select").change(function () {
+    //     let type = $(this).val()
+    //     drawChart(type)
+    // })
+    $('input[name="stats-filter"]').on('change', function () {
         let type = $(this).val()
         drawChart(type)
-    })
+    });
 
     $(".stats-time-range").change(function () {
         let type = $(this).val()
