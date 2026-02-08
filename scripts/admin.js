@@ -422,10 +422,9 @@ function drawChart(type) {
         let userData = [0, 0, 0]
         userVacations.forEach(vacation => {
             vacation.vacationDays.forEach(vacationDay => {
-                console.log(vacationDay, type)
                 switch (Number(type)) {
                     case 0:
-                        if (vacationDay.date.getMonth() == (new Date()).getMonth()) {
+                        if (vacationDay.date.getMonth() == (statsMonth).getMonth()) {
                             userData[vacationDay.status + 1]++
                         }
                         break
@@ -590,7 +589,6 @@ $(document).ready(async function () {
         let start = $(".vacation-start").val()
         let end = $(".vacation-end").val()
         let type = Number($(".vacation-type").val())
-        console.log(type)
 
         if (start == "" || end == "" || type == 0) {
             resetVacationDayInfo()
@@ -645,7 +643,6 @@ $(document).ready(async function () {
 
         var userId = addOrEdit == "add" ? Number($(".vacation-user").val()) : vacationToEdit.vacation.userId;
 
-        console.log(userId)
         for (const vacationDay of currentVacationDays) {
             let vacationDayInfo = getVacationDayByUserId(vacationDay, userId)
             if (vacationDayInfo != null) {
@@ -667,20 +664,6 @@ $(document).ready(async function () {
         vacationRequest["vacationDays"] = currentVacationDays.map((day, index) => {
             return { "dayType": dayTypes[index], "date": dateFns.format(day, "yyyy-MM-dd") }
         })
-
-        console.log(vacationRequest, "a")
-        console.log(vacationToEdit)
-        //let userId = Number($(".vacation-user").val())
-
-        /*
-        if (await addNewVacation(userId, vacationRequest)) {
-            vacations = await getVacations()
-            openVacations.push(false)
-            buildVacationList()
-            renderCalendar(currentDate)
-        }
-            */
-
 
         switch (addOrEdit) {
             case "add":
@@ -776,38 +759,34 @@ $(document).ready(async function () {
     })
 
     $(".statistics-button").click(function () {
-
         updateStatsNavigationLabel(statsMonth)
+        $(".five-day-list").html("")
+        users.forEach(user => {
+            let used5days = vacations.some(vacation => vacation.vacation.userId == user.userId && vacation.vacationDays.length >= 5)
+            let name = `${user.firstName} ${user.lastName}`
+            $(".five-day-list").append(`<div class="rounded px-2 m-2">${used5days ? "✔️" : "❌"} ${name}</div>`)
+        })
         $(".statistics-modal").modal("show")
     })
 
-    // $(".statistics-filter-select").change(function () {
-    //     let type = $(this).val()
-    //     drawChart(type)
-    // })
     $('input[name="stats-filter"]').on('change', function () {
         let type = $(this).val()
-        drawChart(type)
-    });
-
-    $(".stats-time-range").change(function () {
-        let type = $(this).val()
-        if (type == "month") {
+        if (type == "0") {
             $(".stats-month-nav").show()
         }
         else { $(".stats-month-nav").hide() }
-        drawChart($(".statistics-filter-select").val())
-    })
+        drawChart(type)
+    });
 
     $(".stats-previous-month").click(function () {
         statsMonth = dateFns.subMonths(statsMonth, 1)
         updateStatsNavigationLabel(statsMonth)
-        drawChart($(".statistics-filter-select").val())
+        drawChart("0")
     })
     $(".stats-next-month").click(function () {
         statsMonth = dateFns.addMonths(statsMonth, 1)
         updateStatsNavigationLabel(statsMonth)
-        drawChart($(".statistics-filter-select").val())
+        drawChart("0")
     })
 
     $(".add-event-button").click(function () {
@@ -932,11 +911,8 @@ $(document).ready(async function () {
         if (vacationDays.length > 0) {
             $(".day-overview-modal-vacations").html("")
             vacationDays.forEach(vacationDay => {
-                console.log(vacationDay)
                 let user = getUser(getVacation(vacationDay.vacationId).vacation.userId)
                 let name = `${user.firstName} ${user.lastName}`
-                let dayType = vacationDay.dayType
-                let dayTypeName = vacationTypes[dayType - 1]
                 let status = vacationDay.status
                 $(".day-overview-modal-vacations").append(`
                     <div class="my-3">
@@ -976,12 +952,10 @@ $(document).ready(async function () {
             $(".day-overview-modal-holidays-events").html("אין מה להציג...")
         }
 
-        let vacationDayUsers = vacationDays.map(vacationDay => getVacation(vacationDay.vacationId).vacation.userId)
         $(".day-overview-modal-team-members").html(`${users.map(user => {
             let vacationDay = getVacationDayByUserId(today, user.userId)
             let opacity = vacationDay == null ? "100" : ["75", "75", "50"][vacationDay.status + 1]
-            let statusText = vacationDay == null ? "נמצא" : ["חופש לא אושר", "מחכה לאישור חופש", "בחופש"][vacationDay.status + 1]
-            // TODO : use text instead of emojis. Laaaame but okay
+            let statusText = vacationDay == null ? "נמצא/ה" : ["חופש לא אושר", "מחכה לאישור חופש", "בחופש"][vacationDay.status + 1]
             return `<span class="fw-bold opacity-${opacity}">${user.firstName} ${user.lastName}</span> - ${statusText}`
         }).join("<br>")}`)
 
