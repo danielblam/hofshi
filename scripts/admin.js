@@ -762,9 +762,12 @@ $(document).ready(async function () {
         updateStatsNavigationLabel(statsMonth)
         $(".five-day-list").html("")
         users.forEach(user => {
-            let used5days = vacations.some(vacation => vacation.vacation.userId == user.userId && vacation.vacationDays.length >= 5)
+            let used5days = vacations.some(vacation => vacation.vacation.userId == user.userId
+                && vacation.vacationDays.length >= 5
+                && vacation.vacation.startDate.getFullYear() == (new Date()).getFullYear()
+                && vacation.vacation.endDate.getFullYear() == (new Date()).getFullYear())
             let name = `${user.firstName} ${user.lastName}`
-            $(".five-day-list").append(`<div class="rounded px-2 m-2">${used5days ? "✔️" : "❌"} ${name}</div>`)
+            $(".five-day-list").append(`<div class="rounded px-2 py-1 m-2">${used5days ? "✔️" : "❌"} ${name}</div>`)
         })
         $(".statistics-modal").modal("show")
     })
