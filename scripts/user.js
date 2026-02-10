@@ -2,7 +2,7 @@ import { HDate, gematriya, HebrewCalendar, Event } from 'https://cdn.jsdelivr.ne
 import {
     ping, repeat, getSelf, url,
     resetVacationDayInfo, toDate, getIsraelBusinessDays,
-    getEvents, isEventDay
+    getEvents, isEventDay, getTeams
 } from "./utilities.js"
 
 var self;
@@ -258,11 +258,13 @@ function buildEventList() {
         let name = event.name
         let description = event.description
         let listToAppend = event.teamId == self.user.teamId ? "" : "other-"
+        let otherTeam = event.teamId == self.user.teamId ? "" : `(${teams.find(team => team.teamId == event.teamId).teamName})<br>`
         $(`.${listToAppend}events-list`).append(`
             <details>
-                <summary>
+                <summary class="my-1">
                     <span class="text-decoration-underline">${name}: ${dateFns.format(endDate, "dd/MM/yy")} - ${dateFns.format(startDate, "dd/MM/yy")}</span>
                     </summary>
+                ${otherTeam}
                 ${description}
             </details>
         `)
@@ -285,6 +287,7 @@ var currentVacationDays = []
 var startDate;
 var endDate;
 
+var teams;
 var vacations;
 var events;
 
@@ -302,6 +305,7 @@ $(document).ready(async function () {
     let check = await ping(self.token)
     if (!check) window.location.href = "./index.html"
 
+    teams = await getTeams(self.token)
     vacations = await getVacations()
     events = await getEvents(self.token)
     console.log(events)

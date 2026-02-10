@@ -374,11 +374,13 @@ function buildEventList() {
         let name = event.name
         let description = event.description
         let listToAppend = event.teamId == self.user.teamId ? "" : "other-"
+        let otherTeam = event.teamId == self.user.teamId ? "" : `(${teams.find(team => team.teamId == event.teamId).teamName})<br>`
         $(`.${listToAppend}events-list`).append(`
             <details data-id="${event.eventId}">
                 <summary class="my-1">
                     <span class="text-decoration-underline">${name}: ${dateFns.format(endDate, "dd/MM/yy")} - ${dateFns.format(startDate, "dd/MM/yy")}</span>
                     </summary>
+                ${otherTeam}
                 ${description}
                 ${event.teamId == self.user.teamId ? `<div>
                     <button class="btn bg-secondary bg-opacity-50 my-2 delete-event">🗑</button>
