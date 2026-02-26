@@ -2,7 +2,7 @@ function getToken() {
     let token = localStorage.getItem("token")
 }
 
-const url = `https://localhost:7079/api`
+const url = `/api`
 
 async function ping(token) {
     const request = new Request(`${url}/Accounts/Ping`, {
