@@ -79,7 +79,7 @@ async function tryPing(token) {
 
 $(document).ready(async function () {
 
-    logIn("","",true)
+    // logIn("","",true)
 
     // let token = localStorage.getItem("token")
     // if (token != null) {
