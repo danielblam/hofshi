@@ -1,18 +1,18 @@
 import { ping, url } from "./utilities.js"
 
 async function logIn(email, password, windowsAuth = false) {
-    const request = windowsAuth ? 
-    new Request(`${url}/Accounts/TryWindowsAuth`, {
-        method: "GET",
-        headers: { 'Content-Type': 'application/json' },
-        credentials: "include"
-    })
-    : 
-    new Request(`${url}/Accounts/Login`, {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: `{"email":"${email}","password":"${password}"}`
-    })
+    const request = windowsAuth ?
+        new Request(`${url}/Accounts/TryWindowsAuth`, {
+            method: "GET",
+            headers: { 'Content-Type': 'application/json' },
+            credentials: "include"
+        })
+        :
+        new Request(`${url}/Accounts/Login`, {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: `{"email":"${email}","password":"${password}"}`
+        })
     try {
         var response = await fetch(request)
     }
@@ -38,17 +38,20 @@ async function logIn(email, password, windowsAuth = false) {
         case 404:
             $(".fail-text").html(await response.text())
             break
+        case 403: // windows auth is disabled on the backend - do nothing
+            break
     }
 }
 
 function redirect(role) {
     console.log(role)
+    const queryString = window.location.search;
     switch (role) {
         case 1:
-            window.location.href = "./user.html"
+            window.location.href = `./user.html${queryString}`
             break;
         case 10:
-            window.location.href = "./admin.html"
+            window.location.href = `./admin.html${queryString}`
             break;
         case 20:
             window.location.href = "./superadmin.html"
@@ -79,7 +82,7 @@ async function tryPing(token) {
 
 $(document).ready(async function () {
 
-    // logIn("","",true)
+    logIn("", "", true)
 
     // let token = localStorage.getItem("token")
     // if (token != null) {
