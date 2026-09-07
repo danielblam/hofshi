@@ -46,6 +46,7 @@ async function logIn(email, password, windowsAuth = false) {
 function redirect(role) {
     console.log(role)
     const queryString = window.location.search;
+    console.log(queryString)
     switch (role) {
         case 1:
             window.location.href = `./user.html${queryString}`
