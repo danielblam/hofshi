@@ -340,6 +340,7 @@ $(document).ready(async function () {
     $(".vacation-type").val("")
 
     self = getSelf()
+
     let check = await ping(self.token)
     if (!check) window.location.href = "./index.html"
 

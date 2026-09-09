@@ -6,6 +6,13 @@ import {
     getTeams,
     ws_url
 } from "./utilities.js"
+import {
+    statsChart, statsMonth,
+    drawChart,
+    subStatsMonth,
+    addStatsMonth
+} from './shared.js'
+
 
 console.log(ws_url)
 const connection = new signalR.HubConnectionBuilder()
@@ -35,7 +42,7 @@ connection.start()
 var self;
 
 async function addNewVacation(userId, vacationRequest) {
-    const request = new Request(`${url}/Vacations/Add/${userId}`, {
+    const request = new Request(`${url}/Vacations/${self.role == 5 ? `Request` : `Add/${userId}`}`, {
         method: "POST",
         headers:
         {
@@ -339,7 +346,7 @@ function buildVacationDayEditor(dates, types) {
     dates.forEach((date, index) => {
         $(".vacation-days").append(
             `<div class="vacation-day my-1 p-1 d-flex rounded fw-bold" data-day-type="${types[index]}">
-                ${addOrEdit == "edit" ? `<input class="vacation-day-approval form-check-input vacation-check p-3 ms-2 m-auto" type="checkbox" checked>` : ``}
+                ${addOrEdit == "edit" && self.role != 5 ? `<input class="vacation-day-approval form-check-input vacation-check p-3 ms-2 m-auto" type="checkbox" checked>` : ``}
                 <div class="col-3 p-1 ps-4">
                     ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} - יום ${weekDays[date.getDay()]}
                 </div>
@@ -385,9 +392,11 @@ function buildVacationList() {
                                 <div class="col-2 fw-bold text-end p-0 my-1">${dayStatusEmoji}</div>
                                 </div>`
         }).join("")}
-                <button class="btn bg-secondary bg-opacity-50 my-2 delete-vacation-request">🗑</button>
+                ${self.role != 5 || vacation.vacation.userId == self.user.userId ?
+                `<button class="btn bg-secondary bg-opacity-50 my-2 delete-vacation-request">🗑</button>
                 <button class="btn bg-secondary bg-opacity-50 my-2 resolve-vacation-request">📝</button>
-            </details>
+            </details>` : ``
+            }
             `)
     })
 }
@@ -438,85 +447,6 @@ function vacationConflict() {
                             כבר יש למשתמש הנתון ימי חופשה בטווח הזה.
                         </div>`)
     $(".submit-request").addClass("disabled")
-}
-function drawChart(type) {
-    let onlyMonthly = $(".stats-time-range").val() == "month"
-    let labels = users.map(user => `${user.firstName} ${user.lastName}`)
-    let data = [[], [], []]
-    let colors = ["#ee8899", "#eecc77", "#88ee88"]
-    let dayTypeWeights = [1, 0.5, 1, 1, 1]
-    let chartType = "bar"
-    users.forEach(user => {
-        let userVacations = vacations.filter(vacation => vacation.vacation.userId == user.userId)
-        let userWorkDayHours = user.workDayHours
-        let cholHamoedMultiplier = (userWorkDayHours - 3) / userWorkDayHours
-
-        let userData = [0, 0, 0]
-        userVacations.forEach(vacation => {
-            vacation.vacationDays.forEach(vacationDay => {
-                var vacationDayWeight = dayTypeWeights[vacationDay.dayType - 1] * (isCholHaMoed(vacationDay.date) ? cholHamoedMultiplier : 1)
-                console.log(vacationDay.date, isCholHaMoed(vacationDay.date))
-                console.log(vacationDayWeight)
-                switch (Number(type)) {
-                    case 0:
-                        if (vacationDay.date.getMonth() == (statsMonth).getMonth()) {
-                            userData[vacationDay.status + 1] += vacationDayWeight
-                        }
-                        break
-                    case 1:
-                        if (vacationDay.date.getFullYear() == (new Date()).getFullYear()) {
-                            userData[vacationDay.status + 1] += vacationDayWeight
-                        }
-                        break
-                }
-            })
-        })
-        data[0].push(userData[0])
-        data[1].push(userData[1])
-        data[2].push(userData[2])
-    })
-
-    if (statsChart != undefined) statsChart.destroy()
-
-    statsChart = new Chart($("#statistics-chart"), {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    backgroundColor: colors[2],
-                    data: data[2],
-                    label: "ימי חופש מאושרים"
-                },
-                {
-                    backgroundColor: colors[1],
-                    data: data[1],
-                    label: "ימי חופש בהמתנה לאישור"
-                },
-                {
-                    backgroundColor: colors[0],
-                    data: data[0],
-                    label: "ימי חופש לא מאושרים"
-                }
-            ]
-        },
-        options: {
-            plugins: {
-                legend: { display: true },
-                title: { display: false }
-            },
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    stacked: true
-                },
-                y: {
-                    stacked: true
-                }
-            }
-        }
-    })
-
 }
 function isCholHaMoed(date) {
     const events = HebrewCalendar.getHolidaysOnDate(date, true);
@@ -585,9 +515,6 @@ var eventEnd;
 
 var openVacations;
 
-var statsChart;
-var statsMonth = new Date()
-
 const params = new URLSearchParams(window.location.search);
 const queriedVacationId = params.get("vacationId")
 
@@ -595,9 +522,18 @@ var editingUserId;
 
 $(document).ready(async function () {
 
+    $("#statistics-modal-container").load("../templates/statistics_modal.html")
+
     $(".vacation-type").val("")
 
     self = getSelf()
+
+    if (self.role == 5) {
+        $(".settings-button").addClass("d-none")
+        $(".add-event-button").addClass("d-none")
+        // $(".request-vacation-button").addClass("d-none")
+    }
+
     let check = await ping(self.token)
     if (!check) window.location.href = "./index.html"
 
@@ -649,6 +585,11 @@ $(document).ready(async function () {
             return `<option value="${name[2]}">${name[0]} ${name[1]}</option>`
         }))
         $(".vacation-user").val("")
+        if (self.role == 5) {
+            $(".vacation-user").addClass("d-none")
+            $(".vacation-user-title").addClass("d-none")
+            $(".vacation-user").val(self.user.userId)
+        }
 
         updateVacationModal()
         $(".request-vacation-modal").modal("show")
@@ -748,15 +689,24 @@ $(document).ready(async function () {
                 if (await editVacation(vacationToEdit.vacation.vacationId, vacationRequest) == false) {
                     return
                 }
-                let approveList = []
-                $.each($(".vacation-day-approval"), function (_, checkbox) {
-                    approveList.push($(checkbox).prop('checked'))
-                })
-                if (await resolveVacation(vacationToEdit.vacation.vacationId, approveList)) {
+                if (self.role == 5) {
                     resetVacationModal()
                     vacations = await getVacations()
                     buildVacationList()
                     renderCalendar(currentDate)
+                }
+                else {
+                    let approveList = []
+                    $.each($(".vacation-day-approval"), function (_, checkbox) {
+                        approveList.push($(checkbox).prop('checked'))
+                    })
+                    if (await resolveVacation(vacationToEdit.vacation.vacationId, approveList)) {
+                        console.log("resetting")
+                        resetVacationModal()
+                        vacations = await getVacations()
+                        buildVacationList()
+                        renderCalendar(currentDate)
+                    }
                 }
                 break;
             default:
@@ -837,12 +787,13 @@ $(document).ready(async function () {
             let used5days = vacations.some(vacation => vacation.vacation.userId == user.userId
                 && vacation.vacationDays.length >= 5
                 && vacation.vacation.startDate.getFullYear() == (new Date()).getFullYear()
-                && vacation.vacation.endDate.getFullYear() == (new Date()).getFullYear())
+                && vacation.vacation.endDate.getFullYear() == (new Date()).getFullYear()
+                && !vacation.vacationDays.some(vacationDay => vacationDay.status < 1))
             let name = `${user.firstName} ${user.lastName}`
             $(".five-day-list").append(`<div class="rounded px-2 py-1 m-2">${used5days ? "✔️" : "❌"} ${name}</div>`)
         })
         $(".statistics-modal").modal("show")
-        drawChart("1")
+        drawChart("1", users, vacations)
     })
 
     $('input[name="stats-filter"]').on('change', function () {
@@ -851,18 +802,18 @@ $(document).ready(async function () {
             $(".stats-month-nav").show()
         }
         else { $(".stats-month-nav").hide() }
-        drawChart(type)
+        drawChart(type, users, vacations)
     });
 
     $(".stats-previous-month").click(function () {
-        statsMonth = dateFns.subMonths(statsMonth, 1)
+        subStatsMonth(1)
         updateStatsNavigationLabel(statsMonth)
-        drawChart("0")
+        drawChart("0", users, vacations)
     })
     $(".stats-next-month").click(function () {
-        statsMonth = dateFns.addMonths(statsMonth, 1)
+        addStatsMonth(1)
         updateStatsNavigationLabel(statsMonth)
-        drawChart("0")
+        drawChart("0", users, vacations)
     })
 
     $(".add-event-button").click(function () {
