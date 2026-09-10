@@ -47,10 +47,7 @@ async function requestNewVacation(vacationRequest) {
     let response = await fetch(request)
     let status = response.status
     if (response.ok) {
-        $(".request-vacation-modal").modal("hide");
-        $(".vacation-start").val("")
-        $(".vacation-end").val("")
-        $(".vacation-type").val("")
+        resetVacationModal()
         resetVacationDayInfo()
         return true
     }
@@ -72,10 +69,7 @@ async function editVacation(vacationId, vacationRequest) {
     console.log(vacationRequest)
     let response = await fetch(request)
     if (response.ok) {
-        $(".request-vacation-modal").modal("hide");
-        $(".vacation-start").val("")
-        $(".vacation-end").val("")
-        $(".vacation-type").val("")
+        resetVacationModal()
         resetVacationDayInfo()
         return true
     }
@@ -83,6 +77,14 @@ async function editVacation(vacationId, vacationRequest) {
         console.log(await response.text())
         return false
     }
+}
+
+function resetVacationModal() {
+    $(".request-vacation-modal").modal("hide");
+    $(".vacation-start").val("")
+    $(".vacation-end").val("")
+    $(".vacation-type").val("")
+    resetVacationDayInfo()
 }
 
 async function getVacations() {
@@ -437,6 +439,7 @@ $(document).ready(async function () {
 
         switch (addOrEdit) {
             case "add":
+                resetVacationModal()
                 if (await requestNewVacation(vacationRequest)) {
                     vacations = await getVacations()
                     openVacations.push(false)
@@ -445,6 +448,7 @@ $(document).ready(async function () {
                 }
                 break;
             case "edit":
+                resetVacationModal()
                 if (await editVacation(vacationToEdit.vacation.vacationId, vacationRequest)) {
                     vacations = await getVacations()
                     buildVacationList()

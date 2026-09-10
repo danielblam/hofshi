@@ -1015,6 +1015,7 @@ $(document).ready(async function () {
         }
 
         $(".work-day-hours").val(user.workDayHours).change()
+        $(".user-role-setting").val(user.role).change()
 
         $(".save-user-settings-button").addClass("disabled")
         $(".user-settings-container").removeClass("d-none")
