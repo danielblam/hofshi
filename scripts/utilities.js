@@ -25,6 +25,15 @@ async function ping(token) {
     return response.ok
 }
 
+async function checkSession(token) {
+    let check = await ping(token)
+    if (!check) {
+        window.location.href = "./index.html"
+        return false
+    }
+    return true
+} 
+
 function repeat(value, length) {
     let out = []
     for (let i = 0; i < length; i++) {
@@ -137,5 +146,6 @@ async function getTeams(token) {
 export {
     ping, repeat, getSelf, url,
     resetVacationDayInfo, toDate, getIsraelBusinessDays, resetVacationModal,
-    getEvents, isEventDay, getTeams
+    getEvents, isEventDay, getTeams,
+    checkSession
 }

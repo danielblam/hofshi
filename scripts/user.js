@@ -3,7 +3,7 @@ import {
     ping, repeat, getSelf, url,
     resetVacationDayInfo, toDate, getIsraelBusinessDays,
     getEvents, isEventDay, getTeams,
-    ws_url
+    ws_url, checkSession
 } from "./utilities.js"
 
 console.log(ws_url)
@@ -371,7 +371,8 @@ $(document).ready(async function () {
         renderCalendar(currentDate)
         updateCalendarNavigationLabel(currentDate)
     })
-    $(".request-vacation-button").click(function () {
+    $(".request-vacation-button").click(async function () {
+        if(!(await checkSession(self.token))) return
         addOrEdit = "add"
         $(".submit-request").html("שלח בקשה")
         $(".vacation-start").val("")
@@ -461,6 +462,8 @@ $(document).ready(async function () {
     })
 
     $(document).on("click", ".delete-vacation-request", async function () {
+        if(!(await checkSession(self.token))) return
+
         let index = $(this).closest('details').index()
         vacationToDeleteId = vacations[index].vacation.vacationId
 
@@ -483,6 +486,8 @@ $(document).ready(async function () {
     })
 
     $(document).on("click", ".edit-vacation-request", async function () {
+        if(!(await checkSession(self.token))) return
+
         let index = $(this).closest('details').index()
         vacationToEdit = vacations[index]
         addOrEdit = "edit"

@@ -4,7 +4,7 @@ import {
     resetVacationDayInfo, toDate, getIsraelBusinessDays, resetVacationModal,
     getEvents, isEventDay,
     getTeams,
-    ws_url
+    ws_url, checkSession
 } from "./utilities.js"
 import {
     statsChart, statsMonth,
@@ -567,7 +567,9 @@ $(document).ready(async function () {
         renderCalendar(currentDate)
         updateCalendarNavigationLabel(currentDate)
     })
-    $(".request-vacation-button").click(function () {
+    $(".request-vacation-button").click(async function () {
+        if(!(await checkSession(self.token))) return
+    
         addOrEdit = "add"
 
         $(".vacation-start").val("")
@@ -715,6 +717,8 @@ $(document).ready(async function () {
     })
 
     $(document).on("click", ".delete-vacation-request", async function () {
+        if(!(await checkSession(self.token))) return
+
         let index = Number($(this).closest('details').attr('data-index'))
 
         vacationToDeleteId = vacations[index].vacation.vacationId
@@ -744,6 +748,8 @@ $(document).ready(async function () {
     })
 
     $(document).on("click", ".resolve-vacation-request", async function () {
+        if(!(await checkSession(self.token))) return
+
         let index = Number($(this).closest('details').attr('data-index'))
         vacationToEdit = vacations[index]
         addOrEdit = "edit"
@@ -816,7 +822,8 @@ $(document).ready(async function () {
         drawChart("0", users, vacations)
     })
 
-    $(".add-event-button").click(function () {
+    $(".add-event-button").click(async function () {
+        if(!(await checkSession(self.token))) return
         eventAddOrEdit = "add"
         $(".submit-event").addClass('disabled')
         $(".event-fail").hide()
@@ -894,7 +901,8 @@ $(document).ready(async function () {
         }
     })
 
-    $(document).on("click", ".delete-event", function () {
+    $(document).on("click", ".delete-event", async function () {
+        if(!(await checkSession(self.token))) return
         eventToDeleteId = Number($(this).closest('details').attr('data-id'))
         let eventToDelete = events.find(event => event.eventId == eventToDeleteId)
         $(".delete-event-modal-name").html(eventToDelete.name)
@@ -911,7 +919,9 @@ $(document).ready(async function () {
         }
     })
 
-    $(document).on("click", ".edit-event", function () {
+    $(document).on("click", ".edit-event", async function () {
+        if(!(await checkSession(self.token))) return
+
         eventAddOrEdit = "edit"
 
         let eventId = Number($(this).closest('details').attr('data-id'))
@@ -990,7 +1000,8 @@ $(document).ready(async function () {
         $(".day-overview-modal").modal("show")
     })
 
-    $(".settings-button").click(function () {
+    $(".settings-button").click(async function () {
+        if(!(await checkSession(self.token))) return
         $(".settings-users-list").html("")
         users.forEach(user => {
             $(".settings-users-list").append(`<div class="d-flex border rounded p-2 px-3 my-1">
